@@ -1,0 +1,17 @@
+{
+    "dependencies": {
+        "express": "^4.18.1",
+        "mongodb": "^4.8.0",
+        "mongoose": "^6.4.4"
+    },
+    "scripts": {
+        "start": "node server.js"
+    },
+    "author": "Wenze Ma",
+    "license": "MIT",
+    "name": "game-on-star-backend",
+    "version": "1.0.0",
+    "description": "Backend for Game On Star",
+    "main": "server.js",
+    "repository": "https://github.com/Wenze-Ma/GameOnStar-backend.git"
+}
