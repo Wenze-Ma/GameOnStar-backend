@@ -11,5 +11,4 @@ const userSchema = new Schema({
     third_party: Boolean,
 })
 
-const User = mongoose.model('User', userSchema);
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);
