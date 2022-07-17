@@ -13,14 +13,14 @@ RUN yarn install --production
 #RUN yarn build
 
 # Stage 2: start app
-FROM node:16.10.0-alpine
-ENV NODE_ENV=development
-WORKDIR /app
+#FROM node:16.10.0-alpine
+#ENV NODE_ENV=development
+#WORKDIR /app
 
 # RUN addgroup -S react && adduser -S react -G react
 # RUN chown -R react /app
 # USER react
-# COPY --from=BUILD_IMAGE /app/build .
+#COPY --from=BUILD_IMAGE /app/build .
 #COPY --from=BUILD_IMAGE /app/node_modules ./node_modules
 
 #RUN yarn global add serve
