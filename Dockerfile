@@ -10,7 +10,7 @@ COPY package.json ./
 COPY yarn.lock ./
 COPY . .
 RUN yarn install --production
-RUN yarn build
+#RUN yarn build
 
 # Stage 2: start app
 FROM node:16.10.0-alpine
@@ -23,6 +23,6 @@ WORKDIR /app
 COPY --from=BUILD_IMAGE /app/build .
 # COPY --from=BUILD_IMAGE /app/node_modules ./node_modules
 
-RUN yarn global add serve
-CMD ["serve", "-s", "."]
-#CMD ["yarn", "start"]
+#RUN yarn global add serve
+#CMD ["serve", "-s", "."]
+CMD ["yarn", "start"]
