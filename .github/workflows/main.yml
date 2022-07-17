@@ -57,4 +57,4 @@ jobs:
             docker rm $(docker stop $(docker ps -a -q --filter ancestor=${{ secrets.DOCKER_HUB_USERNAME }}/gameonstar-backend --format="{{.ID}}"))
             docker rmi ${{ secrets.DOCKER_HUB_USERNAME }}/gameonstar-backend:latest
             docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/gameonstar-backend
-            docker run -d -p 6000:3000 ${{ secrets.DOCKER_HUB_USERNAME }}/gameonstar-backend
+            docker run -d -p 6000:5000 ${{ secrets.DOCKER_HUB_USERNAME }}/gameonstar-backend
