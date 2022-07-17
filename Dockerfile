@@ -20,8 +20,8 @@ WORKDIR /app
 # RUN addgroup -S react && adduser -S react -G react
 # RUN chown -R react /app
 # USER react
-COPY --from=BUILD_IMAGE /app/build .
-# COPY --from=BUILD_IMAGE /app/node_modules ./node_modules
+# COPY --from=BUILD_IMAGE /app/build .
+COPY --from=BUILD_IMAGE /app/node_modules ./node_modules
 
 #RUN yarn global add serve
 #CMD ["serve", "-s", "."]
