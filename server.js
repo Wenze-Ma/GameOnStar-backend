@@ -1,6 +1,6 @@
 const express = require('express');
 const app = express();
-const port = 5000;
+const port = 5399;
 const userRouter = require('./routes/userRouter');
 const mongoose = require('mongoose');
 const connectionString = 'mongodb+srv://wenzema:1b9hZQx6XZudvROh@cluster0.2etmi04.mongodb.net/GameOnStarDatabase?retryWrites=true&w=majority';
