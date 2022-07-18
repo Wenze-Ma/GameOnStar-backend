@@ -25,5 +25,5 @@ RUN yarn install --production
 
 #RUN yarn global add serve
 #CMD ["serve", "-s", "."]
-EXPOSE 5399
+EXPOSE 5000
 CMD ["yarn", "start"]
