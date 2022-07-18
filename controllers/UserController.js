@@ -25,15 +25,42 @@ module.exports.signUp = async (req, res) => {
             user.password_hash = await bcrypt.hash(req.body.password, 10);
         }
         const findUser = await User.findOne({email: user.email});
+        let cookievalue = await bcrypt.hash("secretword", 10);
+        cookievalue = cookievalue.split("$").join("");
+        cookievalue = cookievalue.split("/").join("");
         if (!findUser) {
+            Session.deleteOne({user: user._id}).then(async () => {
+                const today = new Date();
+                today.setHours(today.getHours() + 2);
+                let session = new Session({
+                    "user": user._id,
+                    "session": cookievalue,
+                    "date": today,
+                });
+                await session.save();
+            });
             user = await user.save();
-            res.status(200).json({user: user, success: true});
+            res.status(200).json({
+                user: user, success: true, cookie: cookievalue,
+            });
         } else {
+            Session.deleteOne({user: findUser._id}).then(async () => {
+                const today = new Date();
+                today.setHours(today.getHours() + 2);
+                let session = new Session({
+                    "user": findUser._id,
+                    "session": cookievalue,
+                    "date": today,
+                });
+                await session.save();
+            });
             res.status(200).json({
                 existed: true,
                 user: findUser,
+                cookie: cookievalue,
             })
         }
+
     } catch (error) {
         res.status(400).send(error);
     }
@@ -49,16 +76,21 @@ module.exports.signIn = async (req, res) => {
                 let cookievalue = await bcrypt.hash("secretword", 10);
                 cookievalue = cookievalue.split("$").join("");
                 cookievalue = cookievalue.split("/").join("");
-                res.cookie("game_on_star_cookie", cookievalue, {httpOnly: false});
                 res.send({
                     success: true,
                     user: user,
+                    cookie: cookievalue,
                 });
-                let session = new Session({
-                    "user": user._id,
-                    "session": cookievalue
+                Session.deleteOne({user: user._id}).then(async () => {
+                    const today = new Date();
+                    today.setHours(today.getHours() + 2);
+                    let session = new Session({
+                        "user": user._id,
+                        "session": cookievalue,
+                        "date": today,
+                    });
+                    await session.save();
                 });
-                await session.save();
             } else {
                 res.json({
                     data: "Incorrect password"
@@ -75,5 +107,30 @@ module.exports.signIn = async (req, res) => {
             status: 400,
             message: err.message
         });
+    }
+}
+
+module.exports.getUserByCookie = async (req, res) => {
+    try {
+        const session = await Session.findOne({
+            session: req.body.cookie
+        });
+        if (session) {
+            const user = await User.findOne({
+                _id: session.user,
+            });
+            if (user) {
+                res.json({
+                    success: true,
+                    user: user,
+                })
+            } else {
+                res.send('no such user');
+            }
+        } else {
+            res.send('no such session')
+        }
+    } catch (error) {
+        res.status(400).send(error);
     }
 }

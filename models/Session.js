@@ -5,7 +5,7 @@ let sessionSchema = new Schema(
     {
         user: String,
         session: String,
-        date: {type: Date, default: Date.now},
+        date: Date,
     }
 );
 
