@@ -32,7 +32,9 @@ mongoose.connect(connectionString, options, (err) => {
         console.log("Successfully connected to MongoDB.");
     }
 });
-app.use(cors());
+app.use(cors({
+    origin: '*'
+}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
