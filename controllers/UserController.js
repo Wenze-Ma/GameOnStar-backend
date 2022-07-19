@@ -134,3 +134,12 @@ module.exports.getUserByCookie = async (req, res) => {
         res.status(400).send(error);
     }
 }
+
+module.exports.signOut = async (req, res) => {
+    try {
+        await Session.deleteOne({session: req.body.cookie});
+        res.send("success");
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
