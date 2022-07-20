@@ -33,7 +33,8 @@ mongoose.connect(connectionString, options, (err) => {
     }
 });
 app.use(cors({
-    origin: '*'
+    origin: '*',
+    httpOnly: true,
 }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
