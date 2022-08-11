@@ -7,5 +7,6 @@ roomRoutes.route('/create').post(roomController.createRoom);
 roomRoutes.route('/getRoom/:id').get(roomController.getRoom);
 roomRoutes.route('/join').post(roomController.joinRoom);
 roomRoutes.route('/leave').post(roomController.leaveRoom);
+roomRoutes.route('/delete/:roomId').delete(roomController.deleteRoom);
 
 module.exports = roomRoutes;

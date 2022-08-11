@@ -18,7 +18,6 @@ exports.connection = io => {
         console.log('A user is connected');
         socket.on('add-user', userId => {
             onlineUsers.set(userId, socket.id);
-            console.log(onlineUsers);
         });
         socket.on('join-room', data => {
             const roomId = data.roomId;
@@ -31,6 +30,11 @@ exports.connection = io => {
             rooms.get(roomId).add(data.email);
             users.set(data.email, roomId);
             console.log(rooms);
+            console.log(onlineUsers);
+            console.log(users)
+            for (const email of rooms.get(users.get(data.email))) {
+                socket.to(onlineUsers.get(email)).emit('joined', email);
+            }
         });
         socket.on('send-msg', data => {
             for (const email of rooms.get(users.get(data.userId))) {
@@ -39,12 +43,20 @@ exports.connection = io => {
                 }
             }
         });
-        socket.on('leave-room', roomId => {
+        socket.on('leave-room', data => {
+            const roomId = data.roomId;
+            const email = data.email;
             if (rooms.has(roomId)) {
-                const value = rooms.get(roomId);
-                value.remove(socket.id);
-                rooms.set(roomId, value);
+                rooms.get(roomId).delete(email);
+                if (rooms.get(roomId).size === 0) {
+                    rooms.delete(roomId);
+                }
+                users.delete(email);
+                onlineUsers.delete(email);
             }
+            console.log(rooms);
+            console.log(onlineUsers);
+            console.log(users)
         });
     })
 }

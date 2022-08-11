@@ -3,15 +3,13 @@ const {Schema} = mongoose;
 
 const roomSchema = new Schema({
     host: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
+        type: String,
         required: true,
     },
     roomName: String,
     capacity: Number,
     members: [{
-        type: Schema.Types.ObjectId,
-        ref: 'User'
+        type: String
     }],
     description: String,
 })
