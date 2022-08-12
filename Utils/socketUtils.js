@@ -80,13 +80,17 @@ exports.connection = io => {
                 if (value === socket.id) {
                     const room = await Room.findOne({_id: users.get(key)});
                     if (!room) break;
-                    if (room.host === key) {
+                    if (room.members.length === 1) {
+                        rooms.delete(users.get(key));
                         await Room.deleteOne({_id: room._id});
                     } else {
+                        rooms.get(users.get(key)).delete(key);
+                        if (room.host === key) {
+                            room.host = room.members[1];
+                        }
                         room.members.remove(key);
                         await room.save();
                     }
-                    rooms.get(users.get(key)).delete(key);
                     onlineUsers.delete(key);
                     users.delete(key);
                     break;
