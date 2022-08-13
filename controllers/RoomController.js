@@ -67,9 +67,15 @@ module.exports.leaveRoom = async (req, res) => {
     try {
         const room = await Room.findOne({_id: req.body.id});
         room.members.remove(req.body.email);
-        await room.save();
+        if (room.members[0]) {
+            if (room.host === req.body.email) {
+                room.host = room.members[0];
+            }
+            await room.save();
+        } else {
+            await Room.deleteOne({_id: req.body.id});
+        }
         res.status(200).json({
-            room: room,
             success: true,
         });
     } catch (error) {

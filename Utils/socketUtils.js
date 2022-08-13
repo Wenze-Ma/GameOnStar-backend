@@ -11,94 +11,38 @@ exports.sio = server => {
         }
     })
 }
-global.onlineUsers = new Map();
-global.rooms = new Map();
-global.users = new Map();
-
 
 exports.connection = io => {
     io.on('connection', socket => {
         console.log('A user is connected');
-        for (const [roomId, values] of rooms) {
-            for (const email of values) {
-                if (!onlineUsers.has(email)) {
-                    values.delete(email);
-                }
+        socket.on('join-room', (roomId, userId) => {
+            for (const room of socket.rooms) {
+                socket.leave(room);
             }
-            if (values.size === 0) {
-                rooms.delete(roomId);
-            }
-        }
-        socket.on('add-user', userId => {
-            onlineUsers.set(userId, socket.id);
+            socket.join(roomId);
+            io.to(roomId).emit('join-room', userId);
+            console.log('\n'+`${userId} joined ${roomId}`);
+            console.log(socket.rooms);
+            console.log(io.sockets.adapter.rooms);
         });
-        socket.on('join-room', async data => {
-            const roomId = data.roomId;
-            if (!rooms.has(roomId)) {
-                rooms.set(roomId, new Set());
-            }
-            rooms.get(roomId).add(data.email);
-            users.set(data.email, roomId);
-            const room = await Room.findOne({_id: roomId});
-            if (!room) return;
-            if (!room.members.includes(data.email)) {
-                room.members.push(data.email);
-                await room.save();
-            }
-            console.log(rooms);
-            console.log(onlineUsers);
-            console.log(users)
-            // for (const email of rooms.get(users.get(data.email))) {
-            //     socket.to(onlineUsers.get(email)).emit('joined', email);
-            // }
+
+        socket.on('leave-room', async (roomId, userId) => {
+            socket.leave(roomId);
+            io.to(roomId).emit('leave-room', userId);
+            console.log('\n' + `${userId} leaved ${roomId}`);
+            console.log(socket.rooms);
+            console.log(io.sockets.adapter.rooms);
         });
-        socket.on('send-msg', data => {
-            for (const email of rooms.get(users.get(data.userId))) {
-                if (email !== data.userId) {
-                    socket.to(onlineUsers.get(email)).emit('receive-msg', {sender: data.userId, text: data.text});
-                }
+
+        socket.on('disconnect', () => {
+            for (const room of socket.rooms) {
+                socket.leave(room);
             }
+            console.log('\n'+io.sockets.adapter.rooms);
         });
-        socket.on('leave-room', data => {
-            const roomId = data.roomId;
-            const email = data.email;
-            if (rooms.has(roomId)) {
-                rooms.get(roomId).delete(email);
-                if (rooms.get(roomId).size === 0) {
-                    rooms.delete(roomId);
-                }
-                users.delete(email);
-                onlineUsers.delete(email);
-            }
-            console.log(rooms);
-            console.log(onlineUsers);
-            console.log(users)
-        });
-        socket.on('disconnect', async () => {
-            console.log("disconnect");
-            for (const [key, value] of onlineUsers) {
-                if (value === socket.id) {
-                    const room = await Room.findOne({_id: users.get(key)});
-                    if (!room) break;
-                    if (room.members.length === 1) {
-                        rooms.delete(users.get(key));
-                        await Room.deleteOne({_id: room._id});
-                    } else {
-                        rooms.get(users.get(key)).delete(key);
-                        if (room.host === key) {
-                            room.host = room.members[1];
-                        }
-                        room.members.remove(key);
-                        await room.save();
-                    }
-                    onlineUsers.delete(key);
-                    users.delete(key);
-                    break;
-                }
-            }
-            console.log(rooms);
-            console.log(onlineUsers);
-            console.log(users)
+
+        socket.on('send-message', (roomId, userId, message) => {
+            io.to(roomId).emit('receive-message', userId, message);
         });
     })
 }
