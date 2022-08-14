@@ -90,8 +90,12 @@ exports.connection = io => {
             io.to(roomId).emit('game-start');
         });
 
-        socket.on('tic-tac-toe-place-chess', async (roomId, value, index, newState) => {
+        socket.on('tic-tac-toe-place-chess', (roomId, value, index, newState) => {
             io.to(roomId).emit('tic-tac-toe-place-chess', value, index, newState);
+        });
+
+        socket.on('end-game', (roomId) => {
+            io.to(roomId).emit('end-game');
         });
     })
 }

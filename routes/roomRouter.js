@@ -9,5 +9,6 @@ roomRoutes.route('/join').post(roomController.joinRoom);
 roomRoutes.route('/leave').post(roomController.leaveRoom);
 roomRoutes.route('/delete/:roomId').delete(roomController.deleteRoom);
 roomRoutes.route('/start').post(roomController.startGame);
+roomRoutes.route('/end').post(roomController.endGame);
 
 module.exports = roomRoutes;

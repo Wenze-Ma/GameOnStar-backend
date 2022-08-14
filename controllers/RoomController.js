@@ -111,3 +111,19 @@ module.exports.startGame = async (req, res) => {
         res.status(400).send(error);
     }
 }
+
+module.exports.endGame = async (req, res) => {
+    try {
+        const room = await Room.findOne({_id: req.body.roomId});
+        if (room && room.gameStarted) {
+            room.gameStarted = false;
+            await room.save();
+            res.status(200).json({
+                room: room,
+                success: true
+            });
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
