@@ -75,5 +75,14 @@ exports.connection = io => {
         socket.on('send-message', (roomId, userId, message) => {
             io.to(roomId).emit('receive-message', userId, message);
         });
+
+        socket.on('game-select', async (roomId, index) => {
+            const room = await Room.findOne({_id: roomId});
+            io.to(roomId).emit('game-select', index);
+            if (room) {
+                room.gameSelected = index;
+                await room.save();
+            }
+        })
     })
 }

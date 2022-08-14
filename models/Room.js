@@ -12,6 +12,7 @@ const roomSchema = new Schema({
         type: String
     }],
     description: String,
+    gameSelected: Number,
 })
 
 module.exports = mongoose.model('Room', roomSchema);

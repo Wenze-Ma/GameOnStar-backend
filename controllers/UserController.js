@@ -143,3 +143,14 @@ module.exports.signOut = async (req, res) => {
         res.status(400).send(error);
     }
 }
+
+module.exports.getUserByEmail = async (req, res) => {
+    try {
+        const user = await User.findOne({email: req.params.email});
+        res.json({
+            user: user,
+        });
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
