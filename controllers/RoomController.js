@@ -31,6 +31,7 @@ module.exports.createRoom = async (req, res) => {
             'members': [req.body.host],
             'description': req.body.description,
             'gameSelected': -1,
+            'gameStarted': false,
         });
         await room.save();
         res.status(200).json({
@@ -68,6 +69,7 @@ module.exports.leaveRoom = async (req, res) => {
     try {
         const room = await Room.findOne({_id: req.body.id});
         room.members.remove(req.body.email);
+        room.gameStarted = false;
         if (room.members[0]) {
             if (room.host === req.body.email) {
                 room.host = room.members[0];
@@ -88,6 +90,23 @@ module.exports.deleteRoom = async (req, res) => {
     try {
         await Room.deleteOne({_id: req.params.roomId});
         res.status(200).send('deleted');
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+module.exports.startGame = async (req, res) => {
+    try {
+        const room = await Room.findOne({_id: req.body.roomId});
+        if (room && !room.gameStarted) {
+            room.gameStarted = true;
+            room.gameData = req.body.gameData;
+            await room.save();
+            res.status(200).json({
+                room: room,
+                success: true,
+            });
+        }
     } catch (error) {
         res.status(400).send(error);
     }

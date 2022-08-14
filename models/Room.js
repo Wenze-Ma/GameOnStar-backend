@@ -13,6 +13,8 @@ const roomSchema = new Schema({
     }],
     description: String,
     gameSelected: Number,
+    gameStarted: Boolean,
+    gameData: Map,
 })
 
 module.exports = mongoose.model('Room', roomSchema);

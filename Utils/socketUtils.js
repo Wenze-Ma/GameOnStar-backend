@@ -52,6 +52,7 @@ exports.connection = io => {
                 const r = await Room.findOne({_id: room});
                 if (!r) continue;
                 r.members.remove(email);
+                r.gameStarted = false;
                 if (r.members[0]) {
                     if (r.host === email) {
                         r.host = r.members[0];
@@ -83,6 +84,14 @@ exports.connection = io => {
                 room.gameSelected = index;
                 await room.save();
             }
-        })
+        });
+
+        socket.on('game-start', (roomId) => {
+            io.to(roomId).emit('game-start');
+        });
+
+        socket.on('tic-tac-toe-place-chess', async (roomId, value, index, newState) => {
+            io.to(roomId).emit('tic-tac-toe-place-chess', value, index, newState);
+        });
     })
 }
