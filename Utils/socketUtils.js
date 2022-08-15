@@ -1,7 +1,7 @@
 const socketIO = require('socket.io');
 const axios = require("axios");
 const Room = require('../models/Room');
-
+const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.sio = server => {
     return socketIO(server, {
@@ -18,6 +18,7 @@ exports.connection = io => {
     io.on('connection', socket => {
         console.log('A user is connected');
         socket.on('join-room', async (roomId, userId) => {
+            console.log('\njoined ' + roomId + ' ' + userId);
             for (const room of socket.rooms) {
                 socket.leave(room);
             }
@@ -31,23 +32,25 @@ exports.connection = io => {
                 room.members.push(userId);
                 await room.save();
             }
-            console.log('\n' + `${userId} joined ${roomId}`);
+            console.log(`${userId} joined ${roomId}`);
             console.log(socket.rooms);
             console.log(io.sockets.adapter.rooms);
             console.log(onlineUsers);
         });
 
         socket.on('leave-room', (roomId, userId) => {
+            console.log('\nleaved ' + roomId + ' ' + userId);
             socket.leave(roomId);
             io.to(roomId).emit('leave-room', userId);
-            console.log('\n' + `${userId} leaved ${roomId}`);
+            console.log(`${userId} leaved ${roomId}`);
             console.log(socket.rooms);
             console.log(io.sockets.adapter.rooms);
         });
 
         socket.on('disconnecting', async () => {
-            console.log('disconnecting');
+            console.log('\ndisconnecting');
             for (const room of socket.rooms) {
+                if (!ObjectId.isValid(room)) continue;
                 const email = onlineUsers.get(socket.id);
                 const r = await Room.findOne({_id: room});
                 if (!r) continue;
