@@ -32,6 +32,7 @@ module.exports.createRoom = async (req, res) => {
             'description': req.body.description,
             'gameSelected': 0,
             'gameStarted': false,
+            'watchers': [],
         });
         await room.save();
         res.status(200).json({
@@ -69,7 +70,11 @@ module.exports.leaveRoom = async (req, res) => {
     try {
         const room = await Room.findOne({_id: req.body.id});
         room.members.remove(req.body.email);
-        room.gameStarted = false;
+        if (!room.watchers.includes(req.body.email)) {
+            room.gameStarted = false;
+        }
+        room.usersReady = room.usersReady.filter(u => u !== req.body.email);
+        room.watchers = room.watchers.filter(u => u !== req.body.email);
         if (room.members[0]) {
             if (room.host === req.body.email) {
                 room.host = room.members[0];
@@ -122,6 +127,46 @@ module.exports.endGame = async (req, res) => {
                 room: room,
                 success: true
             });
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+module.exports.watchGame = async (req, res) => {
+    try {
+        const room = await Room.findOne({_id: req.body.roomId});
+        if (room) {
+            if (room.watchers.includes(req.body.email)) {
+                room.watchers = room.watchers.filter(w => w !== req.body.email);
+            } else {
+                room.watchers.push(req.body.email);
+            }
+            await room.save();
+            res.status(200).json({
+                room: room,
+                success: true,
+            })
+        }
+    } catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+module.exports.getReady = async (req, res) => {
+    try {
+        const room = await Room.findOne({_id: req.body.roomId});
+        if (room) {
+            if (room.usersReady.includes(req.body.email)) {
+                room.usersReady = room.usersReady.filter(w => w !== req.body.email);
+            } else {
+                room.usersReady.push(req.body.email);
+            }
+            await room.save();
+            res.status(200).json({
+                room: room,
+                success: true,
+            })
         }
     } catch (error) {
         res.status(400).send(error);

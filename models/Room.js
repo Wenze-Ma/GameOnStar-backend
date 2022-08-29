@@ -9,12 +9,16 @@ const roomSchema = new Schema({
     roomName: String,
     capacity: Number,
     members: [{
-        type: String
+        type: String,
     }],
     description: String,
     gameSelected: Number,
     gameStarted: Boolean,
     gameData: Map,
+    watchers: [{
+        type: String,
+    }],
+    usersReady: [{type: String}],
 })
 
 module.exports = mongoose.model('Room', roomSchema);

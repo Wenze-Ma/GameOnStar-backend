@@ -54,7 +54,7 @@ exports.connection = io => {
 
         socket.on('watch', (roomId, userId) => {
             io.to(roomId).emit('watch', userId);
-        })
+        });
 
         socket.on('disconnecting', async () => {
             console.log('\ndisconnecting');
@@ -64,7 +64,11 @@ exports.connection = io => {
                 const r = await Room.findOne({_id: room});
                 if (!r) continue;
                 r.members.remove(email);
-                r.gameStarted = false;
+                if (!r.watchers.includes(email)) {
+                    r.gameStarted = false;
+                }
+                r.usersReady = r.usersReady.filter(u => u !== email);
+                r.watchers = r.watchers.filter(u => u !== email);
                 if (r.members[0]) {
                     if (r.host === email) {
                         r.host = r.members[0];
