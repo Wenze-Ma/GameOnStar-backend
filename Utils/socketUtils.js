@@ -47,6 +47,15 @@ exports.connection = io => {
             console.log(io.sockets.adapter.rooms);
         });
 
+        socket.on('ready', (roomId, userId) => {
+            console.log(userId);
+            io.to(roomId).emit('ready', userId);
+        });
+
+        socket.on('watch', (roomId, userId) => {
+            io.to(roomId).emit('watch', userId);
+        })
+
         socket.on('disconnecting', async () => {
             console.log('\ndisconnecting');
             for (const room of socket.rooms) {

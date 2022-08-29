@@ -30,7 +30,7 @@ module.exports.createRoom = async (req, res) => {
             'capacity': req.body.capacity,
             'members': [req.body.host],
             'description': req.body.description,
-            'gameSelected': -1,
+            'gameSelected': 0,
             'gameStarted': false,
         });
         await room.save();
