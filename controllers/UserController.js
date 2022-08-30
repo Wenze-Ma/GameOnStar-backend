@@ -18,6 +18,7 @@ module.exports.signUp = async (req, res) => {
             'email': req.body.email,
             'firstName': req.body.firstName,
             'lastName': req.body.lastName,
+            'picture': `https://avatars.dicebear.com/api/adventurer-neutral/${req.body.email}.svg`,
         });
         if (req.body.thirdParty) {
             user.third_party = true;
