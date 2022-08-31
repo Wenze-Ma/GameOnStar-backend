@@ -1,4 +1,5 @@
 const Room = require('../models/Room');
+const {gameInfo} = require("../Utils/GameInfo");
 
 module.exports.getRooms = async (req, res) => {
     try {
@@ -33,6 +34,7 @@ module.exports.createRoom = async (req, res) => {
             'gameSelected': 0,
             'gameStarted': false,
             'watchers': [],
+            'usersReady': [req.body.host],
         });
         await room.save();
         res.status(200).json({
@@ -70,14 +72,19 @@ module.exports.leaveRoom = async (req, res) => {
     try {
         const room = await Room.findOne({_id: req.body.id});
         room.members.remove(req.body.email);
-        if (!room.watchers.includes(req.body.email)) {
-            room.gameStarted = false;
-        }
         room.usersReady = room.usersReady.filter(u => u !== req.body.email);
         room.watchers = room.watchers.filter(u => u !== req.body.email);
+        const requiredNumber = gameInfo[room.gameSelected];
+        if (room.usersReady.length < requiredNumber[0]) {
+            room.gameStarted = false;
+        }
         if (room.members[0]) {
             if (room.host === req.body.email) {
-                room.host = room.members[0];
+                const newHost = room.members[0];
+                room.host = newHost;
+                if (!room.usersReady.includes(newHost)) {
+                    room.usersReady.push(newHost);
+                }
             }
             await room.save();
         } else {
@@ -122,6 +129,7 @@ module.exports.endGame = async (req, res) => {
         const room = await Room.findOne({_id: req.body.roomId});
         if (room && room.gameStarted) {
             room.gameStarted = false;
+            room.usersReady = [room.host];
             await room.save();
             res.status(200).json({
                 room: room,
@@ -141,6 +149,7 @@ module.exports.watchGame = async (req, res) => {
                 room.watchers = room.watchers.filter(w => w !== req.body.email);
             } else {
                 room.watchers.push(req.body.email);
+                room.usersReady = room.usersReady.filter(u => u !== req.body.email);
             }
             await room.save();
             res.status(200).json({

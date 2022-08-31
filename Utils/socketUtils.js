@@ -1,6 +1,7 @@
 const socketIO = require('socket.io');
 const axios = require("axios");
 const Room = require('../models/Room');
+const {gameInfo} = require("./GameInfo");
 const ObjectId = require('mongoose').Types.ObjectId;
 
 exports.sio = server => {
@@ -64,14 +65,19 @@ exports.connection = io => {
                 const r = await Room.findOne({_id: room});
                 if (!r) continue;
                 r.members.remove(email);
-                if (!r.watchers.includes(email)) {
-                    r.gameStarted = false;
-                }
                 r.usersReady = r.usersReady.filter(u => u !== email);
                 r.watchers = r.watchers.filter(u => u !== email);
+                const requiredNumber = gameInfo[r.gameSelected];
+                if (r.usersReady.length < requiredNumber[0]) {
+                    r.gameStarted = false;
+                }
                 if (r.members[0]) {
                     if (r.host === email) {
-                        r.host = r.members[0];
+                        const newHost = r.members[0];
+                        r.host = newHost;
+                        if (!r.usersReady.includes(newHost)) {
+                            r.usersReady.push(newHost);
+                        }
                     }
                     await r.save();
                 } else {
@@ -110,8 +116,20 @@ exports.connection = io => {
             io.to(roomId).emit('tic-tac-toe-place-chess', value, index, newState);
         });
 
-        socket.on('end-game', (roomId) => {
-            io.to(roomId).emit('end-game');
+        socket.on('end-game', (roomId, winner, target) => {
+            io.to(roomId).emit('end-game', winner, target);
+        });
+
+        socket.on('wordle-pick-target', (roomId, word) => {
+            io.to(roomId).emit('wordle-pick-target', word);
+        });
+
+        socket.on('wordle-send-word', (roomId, newStatus, userId) => {
+            socket.to(roomId).emit('wordle-send-word', newStatus, userId);
+        });
+
+        socket.on('wordle-fail', (roomId, userId) => {
+           io.to(roomId).emit('wordle-fail', userId);
         });
     })
 }
